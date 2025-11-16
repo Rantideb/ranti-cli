@@ -1,0 +1,36 @@
+{
+  "name": "rantideb",
+  "version": "1.1.4",
+  "description": "Rantideb Howlader's interactive CLI portfolio/resume - where code meets literature",
+  "main": "index.js",
+  "bin": {
+    "rantideb": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js"
+  },
+  "keywords": [
+    "portfolio",
+    "cli",
+    "rantideb",
+    "developer",
+    "literature",
+    "sre",
+    "airbnb"
+  ],
+  "author": "Rantideb Howlader <connect@ranti.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "clear": "^0.1.0",
+    "inquirer": "^8.2.5",
+    "open": "^8.4.2",
+    "ora": "^5.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rantideb/Prosefile"
+  },
+  "homepage": "https://ranti.dev"
+}
