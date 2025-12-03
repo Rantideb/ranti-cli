@@ -350,176 +350,29 @@ function wrapText(text, maxWidth) {
 function showFullResume() {
   clear(true);
   
-  const terminalWidth = process.stdout.columns || 100;
-  const contentWidth = Math.min(terminalWidth - 10, 90);
-  const textWidth = contentWidth - 20; // Leave space for bars and padding
+  // Launch the Ink app for interactive resume
+  const { spawn } = require('child_process');
+  const path = require('path');
+  const inkAppPath = path.join(__dirname, 'ink-app.js');
   
-  // Helper function to wrap text to fit width
-  const wrapText = (text, maxWidth) => {
-    // First, protect names and special phrases from being split
-    const protectedPhrases = [
-      'Prof. Susan Mizruchi',
-      'Boston University',
-      'Banaras Hindu University',
-      'Satyajit Ray Film & Television Institute'
-    ];
-    
-    let processedText = text;
-    const placeholders = [];
-    
-    // Replace protected phrases with placeholders
-    protectedPhrases.forEach((phrase, index) => {
-      const placeholder = `__PROTECTED_${index}__`;
-      if (processedText.includes(phrase)) {
-        processedText = processedText.replace(phrase, placeholder);
-        placeholders.push({ placeholder, phrase });
-      }
-    });
-    
-    const words = processedText.split(' ');
-    const lines = [];
-    let currentLine = '';
-    
-    words.forEach(word => {
-      const testLine = currentLine ? currentLine + ' ' + word : word;
-      // Remove ANSI codes for length calculation
-      let visualLength = testLine.replace(/\x1b\[[0-9;]*m/g, '');
-      
-      // Restore protected phrases for length calculation
-      placeholders.forEach(({ placeholder, phrase }) => {
-        visualLength = visualLength.replace(placeholder, phrase);
-      });
-      
-      if (visualLength.length <= maxWidth) {
-        currentLine = testLine;
-      } else {
-        if (currentLine) {
-          // Restore protected phrases before adding to lines
-          let restoredLine = currentLine;
-          placeholders.forEach(({ placeholder, phrase }) => {
-            restoredLine = restoredLine.replace(placeholder, phrase);
-          });
-          lines.push(restoredLine);
-        }
-        currentLine = word;
-      }
-    });
-    
-    if (currentLine) {
-      // Restore protected phrases in the last line
-      let restoredLine = currentLine;
-      placeholders.forEach(({ placeholder, phrase }) => {
-        restoredLine = restoredLine.replace(placeholder, phrase);
-      });
-      lines.push(restoredLine);
-    }
-    
-    return lines;
-  };
-  
-  // Helper function to create vertical bar design
-  const createSection = (title, content, barColor) => {
-    const bar = chalk.hex(barColor)('│ │ │ │ │');
-    console.log('\n' + bar + '  ' + chalk.bold.white(title));
-    console.log(bar);
-    
-    // Split content by newlines and wrap each line
-    const lines = content.split('\n');
-    lines.forEach(line => {
-      if (line.trim() === '') {
-        console.log(bar);
-      } else {
-        const wrappedLines = wrapText(line, textWidth);
-        wrappedLines.forEach(wrappedLine => {
-          console.log(bar + '  ' + wrappedLine);
-        });
-      }
-    });
-    console.log('');
-  };
-  
-  // Header
-  console.log('\n');
-  console.log(chalk.bold.hex('#00D9FF')('═'.repeat(Math.min(contentWidth, 80))));
-  console.log(chalk.bold.hex('#00D9FF')('  ' + portfolioData.name.toUpperCase()));
-  console.log(chalk.bold.white('  ' + portfolioData.title + ' @ ' + portfolioData.company));
-  console.log(chalk.white('  PhD Candidate, Boston University • ' + portfolioData.location));
-  console.log(chalk.bold.hex('#00D9FF')('═'.repeat(Math.min(contentWidth, 80))));
-  console.log(chalk.cyan('  ✉ ' + portfolioData.email + '  |  🌐 ' + portfolioData.website.replace('https://', '')));
-  console.log(chalk.cyan('  💼 linkedin.com/in/rantideb  |  🐙 github.com/Rantideb'));
-  console.log(chalk.cyan('  📝 ' + portfolioData.blog.replace('https://', '')));
-  console.log(chalk.bold.hex('#00D9FF')('═'.repeat(Math.min(contentWidth, 80))));
-  
-  // Professional Summary
-  createSection(
-    '💡 PROFESSIONAL SUMMARY',
-    chalk.white(portfolioData.summary),
-    '#00FF00'
-  );
-  
-  // Work Experience
-  let workText = '';
-  portfolioData.work.forEach((job, index) => {
-    workText += chalk.bold.yellow(job.company.toUpperCase()) + '\n';
-    workText += chalk.white(job.title + ' | ' + job.period + ' | ' + job.location) + '\n';
-    job.highlights.forEach(h => {
-      workText += chalk.white('• ' + h) + '\n';
-    });
-    if (index < portfolioData.work.length - 1) workText += '\n';
+  const inkProcess = spawn('node', [inkAppPath], {
+    stdio: 'inherit'
   });
-  createSection('💼 PROFESSIONAL EXPERIENCE', workText, '#FF5A5F');
   
-  // Education
-  let eduText = '';
-  portfolioData.education.forEach((edu, index) => {
-    eduText += chalk.bold.yellow(edu.school.toUpperCase()) + '\n';
-    eduText += chalk.white(edu.degree + (edu.field ? ' — ' + edu.field : '')) + '\n';
-    eduText += chalk.white(edu.period) + '\n';
-    if (edu.award) eduText += chalk.green('🏆 ' + edu.award) + '\n';
-    if (edu.role) {
-      const roleText = edu.professor ? edu.role + ' ' + edu.professor : edu.role;
-      eduText += chalk.blue('📚 ' + roleText) + '\n';
-    }
-    if (index < portfolioData.education.length - 1) eduText += '\n';
+  inkProcess.on('close', (code) => {
+    // Small delay to ensure terminal is ready, then return to main menu
+    setTimeout(() => {
+      clear(true);
+      showMainMenu();
+    }, 100);
   });
-  createSection('🎓 EDUCATION', eduText, '#FFD700');
   
-  // Skills - with proper wrapping
-  let skillsText = '';
-  Object.keys(portfolioData.skills).forEach(category => {
-    skillsText += chalk.bold.cyan(category.toUpperCase()) + '\n';
-    skillsText += chalk.white(portfolioData.skills[category].join(' • ')) + '\n\n';
+  inkProcess.on('error', (err) => {
+    console.error(chalk.red('Error launching interactive resume:'), err);
+    setTimeout(() => {
+      showMainMenu();
+    }, 1000);
   });
-  createSection('⚙️ SKILLS & EXPERTISE', skillsText, '#00D9FF');
-  
-  // Projects
-  let projText = '';
-  portfolioData.projects.forEach((proj, index) => {
-    projText += chalk.bold.yellow(proj.name.toUpperCase()) + '\n';
-    projText += chalk.white(proj.description) + '\n';
-    projText += chalk.cyan('Tech: ' + proj.tech.join(', ')) + '\n';
-    if (index < portfolioData.projects.length - 1) projText += '\n';
-  });
-  createSection('🚀 KEY PROJECTS', projText, '#9B59B6');
-  
-  // Awards
-  let awardsText = portfolioData.awards.map(a => chalk.white('• ' + a)).join('\n');
-  createSection('🏆 AWARDS & RECOGNITION', awardsText, '#F39C12');
-  
-  // Publications
-  let pubsText = portfolioData.publications.map(p => chalk.white('• ' + p)).join('\n');
-  createSection('📝 PUBLICATIONS & RESEARCH', pubsText, '#E74C3C');
-  
-  // Research Interests
-  let interestsText = portfolioData.interests.map(i => chalk.white('• ' + i)).join('\n');
-  createSection('🔬 RESEARCH INTERESTS', interestsText, '#3498DB');
-  
-  // Footer
-  console.log(chalk.white('─'.repeat(Math.min(contentWidth, 80))));
-  console.log(chalk.white('  Developed with ❤️ by Rantideb'));
-  console.log(chalk.white('─'.repeat(Math.min(contentWidth, 80)) + '\n'));
-  
-  waitForContinue();
 }
 
 function waitForContinue() {
@@ -617,7 +470,10 @@ function showCommandPrompt() {
 
 function handleAction(action) {
   switch(action) {
-    case 'resume': showFullResume(); break;
+    case 'resume':
+      showFullResume();
+      break;
+
     case 'work': showWorkExperience(); break;
     case 'education': showEducation(); break;
     case 'skills': showSkills(); break;
@@ -675,4 +531,10 @@ function handleAction(action) {
 }
 
 // Start the application
-showMainMenu();
+// Run CLI only if this file is executed directly
+if (require.main === module) {
+  showMainMenu();
+}
+
+// Export portfolioData for ink-app.js
+exports.portfolioData = portfolioData;

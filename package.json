@@ -1,6 +1,6 @@
 {
   "name": "rantideb",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "Rantideb Howlader's interactive CLI portfolio/resume - where code meets literature",
   "main": "index.js",
   "bin": {
@@ -24,9 +24,14 @@
     "boxen": "^5.1.2",
     "chalk": "^4.1.2",
     "clear": "^0.1.0",
+    "figlet": "^1.5.2",
+    "gradient-string": "^2.0.1",
+    "ink": "^3.2.0",
     "inquirer": "^8.2.5",
     "open": "^8.4.2",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "react": "^17.0.2",
+    "terminal-link": "^2.1.1"
   },
   "repository": {
     "type": "git",
