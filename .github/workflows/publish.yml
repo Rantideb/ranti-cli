@@ -14,10 +14,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: |
-          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
-          echo "GITHUB_WORKFLOW_REF: $GITHUB_WORKFLOW_REF"
-          echo "GITHUB_REF: $GITHUB_REF"
       - run: npm ci
       - run: npm publish --provenance --access public
