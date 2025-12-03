@@ -1,6 +1,6 @@
 {
   "name": "rantideb",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Rantideb Howlader's interactive CLI portfolio/resume - where code meets literature",
   "main": "index.js",
   "bin": {
